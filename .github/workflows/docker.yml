@@ -14,15 +14,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Login to DockerHub Registry
-      env: # Or as an environment variable
-        DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      run: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag bac11/rust-server:$(date +%s) --tag bac11/rust-server:latest
-    - name: Push Docker image
-      run: docker push bac11/rust-server:$(date +%s)
-    - name: Push Docker image
-      run: docker push bac11/rust-server:latest
-      
+    - name: Kaniko build
+      uses: aevea/action-kaniko@master
+      with:
+        registry: https://index.docker.io/v1
+        image: bac11/rust-server
+        username: ${{ secrets.DOCKERHUB_USERNAME  }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD  }}
+        tag_with_latest: true
+        tag: $(date +%s)
+        path: .
+        build_file: Dockerfile
+        debug: true
