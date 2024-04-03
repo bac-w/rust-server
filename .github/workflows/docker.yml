@@ -1,0 +1,25 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login to DockerHub Registry
+      run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag bac11/rust-server:$(date +%s) --tag bac11/rust-server:latest
+    - name: Push Docker image
+      run: docker push bac11/rust-server:$(date +%s)
+    - name: Push Docker image
+      run: docker push bac11/rust-server:latest
+      

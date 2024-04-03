@@ -1,8 +1,8 @@
 # Rust server that runs inside a Docker container
-[![Docker Automated build](https://img.shields.io/docker/automated/didstopia/rust-server.svg)](https://hub.docker.com/r/didstopia/rust-server/)
-[![Docker build status](https://img.shields.io/docker/build/didstopia/rust-server.svg)](https://hub.docker.com/r/didstopia/rust-server/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/didstopia/rust-server.svg)](https://hub.docker.com/r/didstopia/rust-server/)
-[![Docker stars](https://img.shields.io/docker/stars/didstopia/rust-server.svg)](https://hub.docker.com/r/didstopia/rust-server)
+[![Docker Automated build](https://img.shields.io/docker/automated/bac11/rust-server.svg)](https://hub.docker.com/r/bac11/rust-server/)
+[![Docker build status](https://img.shields.io/docker/build/bac11/rust-server.svg)](https://hub.docker.com/r/bac11/rust-server/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/bac11/rust-server.svg)](https://hub.docker.com/r/bac11/rust-server/)
+[![Docker stars](https://img.shields.io/docker/stars/bac11/rust-server.svg)](https://hub.docker.com/r/bac11/rust-server)
 
 **DISCLAIMER:**
 ```

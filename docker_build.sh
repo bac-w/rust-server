@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t didstopia/rust-server:latest .
+docker build -t bac11/rust-server:latest .

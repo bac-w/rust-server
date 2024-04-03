@@ -58,7 +58,7 @@ fi
 
 # Install/update steamcmd
 echo "Installing/updating steamcmd.."
-curl -s http://media.steampowered.com/installer/steamcmd_linux.tar.gz | bsdtar -xvf- -C /steamcmd
+curl -s http://media.steampowered.com/installer/steamcmd_linux.tar.gz | tar -v -C /steamcmd -zx
 
 # Check which branch to use
 if [ ! -z ${RUST_BRANCH+x} ]; then

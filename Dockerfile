@@ -1,19 +1,73 @@
-FROM didstopia/base:nodejs-12-steamcmd-ubuntu-18.04
+FROM ubuntu:22.04
 
-LABEL maintainer="Didstopia <support@didstopia.com>"
+LABEL maintainer="bac <me@bacx.dev>"
 
 # Fix apt-get warnings
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Add not root user
+RUN groupadd \
+        --system \
+        --gid 1000 \
+        docker && \
+    useradd \
+        --create-home \
+        --home /app \
+        --uid 1000 \
+        --gid 1000 \
+        --groups docker,users,staff \
+        --shell /bin/false \
+        docker && \
+    mkdir -p /app && \
+	chown -R docker:docker /app
+
+# Add nodejs repos
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
 # Install dependencies
-RUN apt-get update && \
+RUN apt-get update -y && \
+    dpkg --add-architecture i386 &&\
     apt-get install -y --no-install-recommends \
         nginx \
         expect \
         tcl \
-	libsdl2-2.0-0:i386 \
-        libgdiplus && \
-    rm -rf /var/lib/apt/lists/*
+        nodejs \
+        npm \ 
+        curl \
+        unzip \
+        software-properties-common \
+        libgdiplus 
+        
+# Install SteamCMD
+RUN add-apt-repository multiverse && \
+    echo steam steam/question select "I AGREE" |  debconf-set-selections && \
+    echo steam steam/license note '' |  debconf-set-selections && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        steamcmd \
+        lib32gcc-s1 \
+        libstdc++6 \
+        libsdl2-2.0-0:i386 \
+        libcurl4-openssl-dev:i386 && \
+    ln -sf /usr/games/steamcmd /usr/local/bin/steamcmd && \
+    ls -la /usr/lib/*/libcurl.so* && \
+    ln -sf /usr/lib/i386-linux-gnu/libcurl.so.4 /usr/lib/i386-linux-gnu/libcurl.so && \
+    ln -sf /usr/lib/i386-linux-gnu/libcurl.so.4 /usr/lib/i386-linux-gnu/libcurl.so.3 && \
+    apt-get clean && \
+    rm -rf \
+        /var/lib/apt/lists/* \
+        /var/tmp/* \
+        /tmp/dumps \
+        /tmp/*
+
+# Install steamcmd and verify that it is working
+RUN mkdir -p /steamcmd && \
+    curl -s http://media.steampowered.com/installer/steamcmd_linux.tar.gz \
+    | tar -v -C /steamcmd -zx && \
+    chmod +x /steamcmd/steamcmd.sh
+
+# # Verify SteamCMD
+# RUN /steamcmd/steamcmd.sh +login anonymous +quit
 
 # Remove default nginx stuff
 RUN rm -fr /usr/share/nginx/html/* && \
@@ -22,15 +76,10 @@ RUN rm -fr /usr/share/nginx/html/* && \
 
 # Install webrcon (specific commit)
 COPY nginx_rcon.conf /etc/nginx/nginx.conf
-RUN curl -sL https://github.com/Facepunch/webrcon/archive/24b0898d86706723d52bb4db8559d90f7c9e069b.zip | bsdtar -xvf- -C /tmp && \
-	mv /tmp/webrcon-24b0898d86706723d52bb4db8559d90f7c9e069b/* /usr/share/nginx/html/ && \
-	rm -fr /tmp/webrcon-24b0898d86706723d52bb4db8559d90f7c9e069b
-
-# Customize the webrcon package to fit our needs
-ADD fix_conn.sh /tmp/fix_conn.sh
-
-# Create the volume directories
-RUN mkdir -p /steamcmd/rust /usr/share/nginx/html /var/log/nginx
+RUN curl -sL https://github.com/Facepunch/webrcon/archive/refs/heads/gh-pages.zip > /tmp/rcon.zip && \
+    unzip /tmp/rcon.zip -d /tmp/rcon && \
+	mv /tmp/rcon/webrcon-gh-pages/* /usr/share/nginx/html/ && \
+	rm -fr /tmp/rcon*
 
 # Setup proper shutdown support
 ADD shutdown_app/ /app/shutdown_app/
@@ -56,6 +105,13 @@ RUN npm install
 ADD rcon_app/ /app/rcon_app/
 WORKDIR /app/rcon_app
 RUN npm install
+
+# Customize the webrcon package to fit our needs
+ADD fix_conn.sh /tmp/fix_conn.sh
+
+# Create the volume directories
+RUN mkdir -p /steamcmd/rust /usr/share/nginx/html /var/log/nginx
+
 RUN ln -s /app/rcon_app/app.js /usr/bin/rcon
 
 # Add the steamcmd installation script
