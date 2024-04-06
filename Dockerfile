@@ -32,7 +32,7 @@ RUN apt-get update -y && \
         curl \
         unzip \
         software-properties-common \
-        libgdiplus 
+        gpg-agent
 
 # Add nginx repo
 RUN add-apt-repository ppa:nginx/stable
