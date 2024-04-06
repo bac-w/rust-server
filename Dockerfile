@@ -47,7 +47,7 @@ RUN curl -sL -o /tmp/dotnet.deb https://packages.microsoft.com/config/ubuntu/22.
     sed -i 's/arch=amd64,arm64,armhf/arch=amd64/g' /etc/apt/sources.list.d/microsoft-prod.list 
 
 ## Install nginx & dotnet 
-RUN apt-get install nginx dotnet-sdk-6.0
+RUN apt-get install -y nginx dotnet-sdk-6.0
 
 ## Installing Umod to use later
 RUN dotnet nuget add source https://www.myget.org/f/umod/api/v3/index.json --name uMod && \
