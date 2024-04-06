@@ -21,20 +21,10 @@ RUN groupadd \
     mkdir -p /app && \
 	chown -R docker:docker /app
 
-# Add nodejs repos
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-
-# Add dotnet 
-RUN curl -sL -o /tmp/dotnet.deb https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
-    dpkg -i /tmp/dotnet.deb && \
-    rm -f /tmp/dotnet.deb && \
-    sed -i 's/arch=amd64,arm64,armhf/arch=amd64/g' /etc/apt/sources.list.d/microsoft-prod.list
-
 # Install dependencies
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-        nginx \
         expect \
         tcl \
         nodejs \
@@ -42,8 +32,22 @@ RUN apt-get update -y && \
         curl \
         unzip \
         software-properties-common \
-        libgdiplus \
-        dotnet-sdk-6.0
+        libgdiplus 
+
+# Add nginx repo
+RUN add-apt-repository ppa:nginx/stable
+
+# Add nodejs repos
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
+# Add dotnet 
+RUN curl -sL -o /tmp/dotnet.deb https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
+    dpkg -i /tmp/dotnet.deb && \
+    rm -f /tmp/dotnet.deb && \
+    sed -i 's/arch=amd64,arm64,armhf/arch=amd64/g' /etc/apt/sources.list.d/microsoft-prod.list 
+
+## Install nginx & dotnet 
+RUN apt-get install nginx dotnet-sdk-6.0
 
 ## Installing Umod to use later
 RUN dotnet nuget add source https://www.myget.org/f/umod/api/v3/index.json --name uMod && \
