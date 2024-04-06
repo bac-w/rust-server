@@ -26,6 +26,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 
 # Install dependencies
 RUN apt-get update -y && \
+    apt-get upgrade -y && \
     dpkg --add-architecture i386 &&\
     apt-get install -y --no-install-recommends \
         nginx \
