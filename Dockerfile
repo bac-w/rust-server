@@ -24,10 +24,15 @@ RUN groupadd \
 # Add nodejs repos
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 
+# Add dotnet 
+RUN curl -sL -o /tmp/dotnet.deb https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
+    dpkg -i /tmp/dotnet.deb && \
+    rm -f /tmp/dotnet.deb && \
+    sed -i 's/arch=amd64,arm64,armhf/arch=amd64/g' /etc/apt/sources.list.d/microsoft-prod.list
+
 # Install dependencies
 RUN apt-get update -y && \
     apt-get upgrade -y && \
-    dpkg --add-architecture i386 &&\
     apt-get install -y --no-install-recommends \
         nginx \
         expect \
@@ -37,38 +42,12 @@ RUN apt-get update -y && \
         curl \
         unzip \
         software-properties-common \
-        libgdiplus 
-        
-# Install SteamCMD
-RUN add-apt-repository multiverse && \
-    echo steam steam/question select "I AGREE" |  debconf-set-selections && \
-    echo steam steam/license note '' |  debconf-set-selections && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-        steamcmd \
-        lib32gcc-s1 \
-        libstdc++6 \
-        libsdl2-2.0-0:i386 \
-        libcurl4-openssl-dev:i386 && \
-    ln -sf /usr/games/steamcmd /usr/local/bin/steamcmd && \
-    ls -la /usr/lib/*/libcurl.so* && \
-    ln -sf /usr/lib/i386-linux-gnu/libcurl.so.4 /usr/lib/i386-linux-gnu/libcurl.so && \
-    ln -sf /usr/lib/i386-linux-gnu/libcurl.so.4 /usr/lib/i386-linux-gnu/libcurl.so.3 && \
-    apt-get clean && \
-    rm -rf \
-        /var/lib/apt/lists/* \
-        /var/tmp/* \
-        /tmp/dumps \
-        /tmp/*
+        libgdiplus \
+        dotnet-sdk-6.0
 
-# Install steamcmd and verify that it is working
-RUN mkdir -p /steamcmd && \
-    curl -s http://media.steampowered.com/installer/steamcmd_linux.tar.gz \
-    | tar -v -C /steamcmd -zx && \
-    chmod +x /steamcmd/steamcmd.sh
-
-# # Verify SteamCMD
-# RUN /steamcmd/steamcmd.sh +login anonymous +quit
+## Installing Umod to use later
+RUN dotnet nuget add source https://www.myget.org/f/umod/api/v3/index.json --name uMod && \
+    dotnet tool install -g uMod --version "*-*"
 
 # Remove default nginx stuff
 RUN rm -fr /usr/share/nginx/html/* && \
